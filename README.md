@@ -41,7 +41,7 @@ _Coming soon_
 
 \`\`\`bash
 # Clone repository
-git clone https://github.com/YOUR-USERNAME/histopath-tracker.git
+git clone https://github.com/enoch-doc/Histopath-specimen-tracking-app
 
 # Install dependencies
 cd histopath-tracker
@@ -53,7 +53,7 @@ npx expo start
 
 ## 👨‍💻 Developer
 
-**Your Name** - Full Stack Developer  
+**Enoch Aremu** - Full Stack Developer  
 LAUTECH Teaching Hospital, Ogbomoso
 
 ## 📄 License
