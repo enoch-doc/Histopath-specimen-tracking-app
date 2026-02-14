@@ -9,11 +9,10 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  SafeAreaView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, SIZES, SHADOWS } from '../constants/theme';
+import { COLORS, SIZES } from '../constants/theme';
 import useAuthStore from '../store/authStore';
 
 export default function LoginScreen() {
@@ -37,7 +36,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar style="light" />
       
       <LinearGradient
@@ -96,7 +95,7 @@ export default function LoginScreen() {
                 placeholderTextColor={COLORS.gray400}
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry={true}
                 autoCapitalize="none"
                 returnKeyType="done"
                 onSubmitEditing={handleLogin}
@@ -132,7 +131,7 @@ export default function LoginScreen() {
           <Text style={styles.footerText}>Version 1.0.0</Text>
         </View>
       </LinearGradient>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -147,7 +146,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    paddingTop: 40,
+    paddingTop: 60,
     paddingBottom: 30,
   },
   logoContainer: {
@@ -158,7 +157,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    ...SHADOWS.large,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   logo: {
     width: 80,
@@ -236,7 +239,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 8,
-    ...SHADOWS.medium,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   signInButtonText: {
     color: COLORS.white,
