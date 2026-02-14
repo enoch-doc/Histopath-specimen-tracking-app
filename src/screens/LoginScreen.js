@@ -1,29 +1,27 @@
 // src/screens/LoginScreen.js
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
   Alert,
-  ScrollView,
-  Animated,
+  Image,
+  SafeAreaView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
 import useAuthStore from '../store/authStore';
-import { Image } from 'react-native';
-export default function LoginScreen({ navigation }) {
+
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
   const { login, isLoading } = useAuthStore();
+  
+  const passwordInputRef = useRef(null);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -39,333 +37,227 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
       
       <LinearGradient
         colors={['#2563EB', '#3B82F6', '#60A5FA']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
         style={styles.gradient}
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Logo & Header Section */}
-          <View style={styles.headerSection}>
-            {/* TODO: Replace with actual LAUTECH logo */}
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.logoText}>🏥</Text>
-            </View>
-            
-            <Text style={styles.appTitle}>HistoPath Tracker</Text>
-            <View style={styles.divider} />
-            <Text style={styles.hospitalName}>
-              Ladoke Akintola University of Technology
-            </Text>
-            <Text style={styles.hospitalName}>Teaching Hospital, Ogbomoso</Text>
-            <Text style={styles.departmentName}>Histopathology Department</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../../assets/images/lautech-logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
           </View>
+          
+          <Text style={styles.appTitle}>HistoPath Tracker</Text>
+          <View style={styles.divider} />
+          <Text style={styles.hospitalName}>LAUTECH Teaching Hospital</Text>
+          <Text style={styles.departmentName}>Histopathology Department</Text>
+        </View>
 
-          {/* Login Card */}
-          <View style={styles.loginCard}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.welcomeText}>Welcome Back</Text>
-              <Text style={styles.instructionText}>
-                Sign in to access specimen tracking
-              </Text>
-            </View>
+        {/* Login Form */}
+        <View style={styles.formContainer}>
+          <Text style={styles.welcomeText}>Welcome Back</Text>
+          <Text style={styles.instructionText}>Sign in to continue</Text>
 
-            {/* Email Input */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Email Address</Text>
-              <View style={[
-                styles.inputContainer,
-                emailFocused && styles.inputContainerFocused
-              ]}>
-                <Text style={styles.inputIcon}>📧</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="your.email@lautech.edu.ng"
-                  placeholderTextColor={COLORS.gray400}
-                  value={email}
-                  onChangeText={setEmail}
-                  onFocus={() => setEmailFocused(true)}
-                  onBlur={() => setEmailFocused(false)}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!isLoading}
-                />
-              </View>
-            </View>
-
-            {/* Password Input */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Password</Text>
-              <View style={[
-                styles.inputContainer,
-                passwordFocused && styles.inputContainerFocused
-              ]}>
-                <Text style={styles.inputIcon}>🔒</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your password"
-                  placeholderTextColor={COLORS.gray400}
-                  value={password}
-                  onChangeText={setPassword}
-                  onFocus={() => setPasswordFocused(true)}
-                  onBlur={() => setPasswordFocused(false)}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  editable={!isLoading}
-                />
-              </View>
-            </View>
-
-            {/* Forgot Password Link */}
-            <TouchableOpacity 
-              style={styles.forgotPasswordContainer}
-              onPress={() => Alert.alert('Contact Admin', 'Please contact system administrator to reset your password')}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            {/* Sign In Button */}
-            <TouchableOpacity
-              style={[styles.signInButton, isLoading && styles.signInButtonDisabled]}
-              onPress={handleLogin}
-              disabled={isLoading}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={isLoading ? [COLORS.gray400, COLORS.gray500] : [COLORS.primary, COLORS.primaryDark]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.signInGradient}
-              >
-                {isLoading ? (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator color={COLORS.white} size="small" />
-                    <Text style={styles.signInButtonText}>Signing In...</Text>
-                  </View>
-                ) : (
-                  <Text style={styles.signInButtonText}>Sign In</Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-
-            {/* Help Text */}
-            <View style={styles.helpContainer}>
-              <Text style={styles.helpText}>Need access? </Text>
-              <TouchableOpacity onPress={() => Alert.alert('Request Access', 'Please contact the IT Administrator or HOD to create an account for you.')}>
-                <Text style={styles.helpLink}>Contact Admin</Text>
-              </TouchableOpacity>
+          {/* Email Input */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Email Address</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="your.email@lautech.edu.ng"
+                placeholderTextColor={COLORS.gray400}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
+              />
             </View>
           </View>
 
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Streamlining Specimen Workflow & Tracking
-            </Text>
-            <Text style={styles.versionText}>Version 1.0.0 • 2026</Text>
+          {/* Password Input */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Password</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                ref={passwordInputRef}
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor={COLORS.gray400}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
+              />
+            </View>
           </View>
-        </ScrollView>
+
+          {/* Sign In Button */}
+          <TouchableOpacity
+            style={styles.signInButton}
+            onPress={handleLogin}
+            disabled={isLoading}
+            activeOpacity={0.8}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <Text style={styles.signInButtonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Help Text */}
+          <TouchableOpacity 
+            style={styles.helpButton}
+            onPress={() => Alert.alert('Request Access', 'Contact IT Administrator for account access')}
+          >
+            <Text style={styles.helpText}>Need access? Contact Admin</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Version 1.0.0</Text>
+        </View>
       </LinearGradient>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.primary,
   },
   gradient: {
     flex: 1,
+    paddingHorizontal: 20,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: SIZES.lg,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: SIZES.lg,
-  },
-  headerSection: {
+  header: {
     alignItems: 'center',
-    marginBottom: SIZES.xl,
+    paddingTop: 40,
+    paddingBottom: 30,
   },
-  logoPlaceholder: {
+  logoContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SIZES.md,
-    borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    marginBottom: 16,
+    ...SHADOWS.large,
   },
-  logoText: {
-    fontSize: 50,
+  logo: {
+    width: 80,
+    height: 80,
   },
   appTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     color: COLORS.white,
-    marginBottom: SIZES.sm,
-    letterSpacing: 0.5,
+    marginBottom: 8,
   },
   divider: {
-    width: 60,
+    width: 50,
     height: 3,
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 2,
-    marginVertical: SIZES.sm,
+    marginVertical: 8,
   },
   hospitalName: {
-    fontSize: SIZES.body,
+    fontSize: 16,
     color: COLORS.white,
     fontWeight: '600',
     textAlign: 'center',
-    marginTop: SIZES.xs,
   },
-  hospitalSubName: {
-    fontSize: SIZES.bodySmall,
+  departmentName: {
+    fontSize: 14,
     color: COLORS.white,
     opacity: 0.9,
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 4,
   },
-  departmentName: {
-    fontSize: SIZES.bodySmall,
-    color: COLORS.white,
-    opacity: 0.85,
-    textAlign: 'center',
-    marginTop: SIZES.xs,
-    fontStyle: 'italic',
-  },
-  loginCard: {
+  formContainer: {
+    flex: 1,
     backgroundColor: COLORS.white,
-    borderRadius: SIZES.radiusXl,
-    padding: SIZES.lg,
-    ...SHADOWS.large,
-  },
-  cardHeader: {
-    marginBottom: SIZES.lg,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    padding: 24,
   },
   welcomeText: {
-    fontSize: SIZES.h3,
+    fontSize: 24,
     fontWeight: 'bold',
     color: COLORS.textPrimary,
-    marginBottom: SIZES.xs,
+    marginBottom: 4,
   },
   instructionText: {
-    fontSize: SIZES.bodySmall,
+    fontSize: 14,
     color: COLORS.textSecondary,
+    marginBottom: 24,
   },
   inputWrapper: {
-    marginBottom: SIZES.md,
+    marginBottom: 16,
   },
   inputLabel: {
-    fontSize: SIZES.bodySmall,
+    fontSize: 14,
     fontWeight: '600',
     color: COLORS.textPrimary,
-    marginBottom: SIZES.sm,
+    marginBottom: 8,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: SIZES.inputHeight,
-    borderWidth: 2,
-    borderColor: COLORS.gray200,
-    borderRadius: SIZES.radiusMd,
-    paddingHorizontal: SIZES.md,
-    backgroundColor: COLORS.gray50,
-  },
-  inputContainerFocused: {
-    borderColor: COLORS.primary,
+    borderWidth: 1,
+    borderColor: COLORS.gray300,
+    borderRadius: 8,
     backgroundColor: COLORS.white,
-    ...SHADOWS.small,
-  },
-  inputIcon: {
-    fontSize: 20,
-    marginRight: SIZES.sm,
   },
   input: {
-    flex: 1,
-    fontSize: SIZES.body,
-    color: COLORS.textPrimary,
-    paddingVertical: 0,
-  },
-  forgotPasswordContainer: {
-    alignSelf: 'flex-end',
-    marginTop: SIZES.xs,
-    marginBottom: SIZES.lg,
-  },
-  forgotPasswordText: {
-    color: COLORS.primary,
-    fontSize: SIZES.bodySmall,
-    fontWeight: '600',
+    height: 50,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: COLORS.black,
   },
   signInButton: {
-    height: SIZES.buttonHeight,
-    borderRadius: SIZES.radiusMd,
-    overflow: 'hidden',
-    ...SHADOWS.medium,
-  },
-  signInButtonDisabled: {
-    opacity: 0.7,
-  },
-  signInGradient: {
-    flex: 1,
+    height: 50,
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SIZES.sm,
+    marginTop: 8,
+    ...SHADOWS.medium,
   },
   signInButtonText: {
     color: COLORS.white,
-    fontSize: SIZES.body,
+    fontSize: 16,
     fontWeight: 'bold',
-    letterSpacing: 0.5,
   },
-  helpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: SIZES.lg,
+  helpButton: {
+    marginTop: 16,
+    alignItems: 'center',
   },
   helpText: {
-    fontSize: SIZES.bodySmall,
-    color: COLORS.textSecondary,
-  },
-  helpLink: {
-    fontSize: SIZES.bodySmall,
+    fontSize: 14,
     color: COLORS.primary,
-    fontWeight: '600',
   },
   footer: {
-    marginTop: SIZES.xl,
+    paddingVertical: 16,
     alignItems: 'center',
-    paddingVertical: SIZES.md,
   },
   footerText: {
-    fontSize: SIZES.bodySmall,
+    fontSize: 12,
     color: COLORS.white,
     opacity: 0.8,
-    textAlign: 'center',
-  },
-  versionText: {
-    fontSize: SIZES.caption,
-    color: COLORS.white,
-    opacity: 0.7,
-    marginTop: SIZES.xs,
   },
 });
