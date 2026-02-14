@@ -6,27 +6,102 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
 import useAuthStore from '../store/authStore';
 
+const { width } = Dimensions.get('window');
+
 export default function DashboardScreen({ navigation }) {
   const { user } = useAuthStore();
 
-  const stats = [
-    { label: 'Total Today', value: '12', icon: 'stats-chart', color: COLORS.primary },
-    { label: 'Pending', value: '5', icon: 'time', color: COLORS.warning },
-    { label: 'In Progress', value: '4', icon: 'sync', color: COLORS.info },
-    { label: 'Completed', value: '3', icon: 'checkmark-circle', color: COLORS.success },
+  // Role-based stats
+  const getRoleStats = () => {
+    switch(user?.role) {
+      case 'receptionist':
+        return [
+          { label: 'Registered Today', value: '12', icon: 'add-circle', color: COLORS.primary },
+          { label: 'Pending Reception', value: '5', icon: 'time', color: COLORS.warning },
+          { label: 'STAT Cases', value: '2', icon: 'alert-circle', color: COLORS.danger },
+          { label: 'This Week', value: '87', icon: 'calendar', color: COLORS.success },
+        ];
+      case 'pathologist':
+        return [
+          { label: 'Awaiting Report', value: '8', icon: 'document-text', color: COLORS.primary },
+          { label: 'STAT Priority', value: '3', icon: 'alert-circle', color: COLORS.danger },
+          { label: 'Completed Today', value: '5', icon: 'checkmark-circle', color: COLORS.success },
+          { label: 'This Week', value: '42', icon: 'calendar', color: COLORS.info },
+        ];
+      case 'lab_technician':
+      case 'lab_scientist':
+        return [
+          { label: 'In Processing', value: '15', icon: 'flask', color: COLORS.primary },
+          { label: 'Awaiting Staining', value: '7', icon: 'color-palette', color: COLORS.warning },
+          { label: 'Ready for Slides', value: '4', icon: 'apps', color: COLORS.info },
+          { label: 'Completed', value: '23', icon: 'checkmark-circle', color: COLORS.success },
+        ];
+      default:
+        return [
+          { label: 'Total Today', value: '12', icon: 'stats-chart', color: COLORS.primary },
+          { label: 'Pending', value: '5', icon: 'time', color: COLORS.warning },
+          { label: 'In Progress', value: '4', icon: 'sync', color: COLORS.info },
+          { label: 'Completed', value: '3', icon: 'checkmark-circle', color: COLORS.success },
+        ];
+    }
+  };
+
+  // Role-based quick actions
+  const getRoleActions = () => {
+    switch(user?.role) {
+      case 'receptionist':
+        return [
+          { title: 'Register Specimen', icon: 'add-circle', color: COLORS.primary, screen: 'SpecimenRegistration' },
+          { title: 'Scan QR Code', icon: 'qr-code', color: COLORS.success, screen: 'Scanner' },
+          { title: 'View Queue', icon: 'list', color: COLORS.info, screen: 'SpecimenList' },
+          { title: 'Print Labels', icon: 'print', color: COLORS.warning, screen: 'Dashboard' },
+        ];
+      case 'pathologist':
+        return [
+          { title: 'Pending Reports', icon: 'document-text', color: COLORS.primary, screen: 'SpecimenList' },
+          { title: 'View Slides', icon: 'eye', color: COLORS.success, screen: 'SpecimenList' },
+          { title: 'STAT Cases', icon: 'alert-circle', color: COLORS.danger, screen: 'SpecimenList' },
+          { title: 'Analytics', icon: 'bar-chart', color: COLORS.info, screen: 'Dashboard' },
+        ];
+      case 'lab_technician':
+      case 'lab_scientist':
+        return [
+          { title: 'Process Specimens', icon: 'flask', color: COLORS.primary, screen: 'SpecimenList' },
+          { title: 'Scan QR', icon: 'qr-code', color: COLORS.success, screen: 'Scanner' },
+          { title: 'Update Stage', icon: 'arrow-up-circle', color: COLORS.info, screen: 'SpecimenList' },
+          { title: 'View Queue', icon: 'list', color: COLORS.warning, screen: 'SpecimenList' },
+        ];
+      default:
+        return [
+          { title: 'Register Specimen', icon: 'add-circle', color: COLORS.primary, screen: 'SpecimenRegistration' },
+          { title: 'Scan QR Code', icon: 'qr-code', color: COLORS.success, screen: 'Scanner' },
+          { title: 'View All', icon: 'list', color: COLORS.info, screen: 'SpecimenList' },
+          { title: 'Analytics', icon: 'bar-chart', color: COLORS.warning, screen: 'Dashboard' },
+        ];
+    }
+  };
+
+  const stats = getRoleStats();
+  const quickActions = getRoleActions();
+
+  // Simple chart data (mock)
+  const chartData = [
+    { day: 'Mon', value: 12 },
+    { day: 'Tue', value: 19 },
+    { day: 'Wed', value: 15 },
+    { day: 'Thu', value: 22 },
+    { day: 'Fri', value: 18 },
+    { day: 'Sat', value: 8 },
+    { day: 'Sun', value: 6 },
   ];
 
-  const quickActions = [
-    { title: 'Register Specimen', icon: 'add-circle', color: COLORS.primary, screen: 'SpecimenRegistration' },
-    { title: 'Scan QR Code', icon: 'qr-code', color: COLORS.success, screen: 'Scanner' },
-    { title: 'View All', icon: 'list', color: COLORS.info, screen: 'SpecimenList' },
-    { title: 'Analytics', icon: 'bar-chart', color: COLORS.warning, screen: 'Dashboard' },
-  ];
+  const maxValue = Math.max(...chartData.map(d => d.value));
 
   return (
     <View style={styles.container}>
@@ -77,10 +152,34 @@ export default function DashboardScreen({ navigation }) {
           ))}
         </View>
 
+        {/* Weekly Chart */}
+        <Text style={styles.sectionTitle}>This Week's Activity</Text>
+        <View style={styles.chartCard}>
+          <View style={styles.chart}>
+            {chartData.map((item, index) => (
+              <View key={index} style={styles.chartBar}>
+                <View style={styles.barContainer}>
+                  <View 
+                    style={[
+                      styles.bar, 
+                      { 
+                        height: `${(item.value / maxValue) * 100}%`,
+                        backgroundColor: item.day === 'Thu' ? COLORS.primary : COLORS.gray300
+                      }
+                    ]} 
+                  />
+                </View>
+                <Text style={styles.barValue}>{item.value}</Text>
+                <Text style={styles.barLabel}>{item.day}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
         {/* Recent Activity */}
         <Text style={styles.sectionTitle}>Recent Activity</Text>
         <View style={styles.activityCard}>
-          <View style={styles.activityIconContainer}>
+          <View style={[styles.activityIconContainer, { backgroundColor: COLORS.info + '15' }]}>
             <Ionicons name="arrow-forward-circle" size={20} color={COLORS.info} />
           </View>
           <View style={styles.activityContent}>
@@ -89,7 +188,7 @@ export default function DashboardScreen({ navigation }) {
           </View>
         </View>
         <View style={styles.activityCard}>
-          <View style={styles.activityIconContainer}>
+          <View style={[styles.activityIconContainer, { backgroundColor: COLORS.success + '15' }]}>
             <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
           </View>
           <View style={styles.activityContent}>
@@ -98,7 +197,7 @@ export default function DashboardScreen({ navigation }) {
           </View>
         </View>
         <View style={styles.activityCard}>
-          <View style={styles.activityIconContainer}>
+          <View style={[styles.activityIconContainer, { backgroundColor: COLORS.danger + '15' }]}>
             <Ionicons name="alert-circle" size={20} color={COLORS.danger} />
           </View>
           <View style={styles.activityContent}>
@@ -231,6 +330,45 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     textAlign: 'center',
   },
+  chartCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radiusMd,
+    padding: SIZES.md,
+    marginBottom: SIZES.lg,
+    ...SHADOWS.small,
+  },
+  chart: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+    height: 150,
+  },
+  chartBar: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  barContainer: {
+    width: '80%',
+    height: 100,
+    justifyContent: 'flex-end',
+  },
+  bar: {
+    width: '100%',
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    minHeight: 8,
+  },
+  barValue: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginTop: 4,
+  },
+  barLabel: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
   activityCard: {
     backgroundColor: COLORS.white,
     padding: SIZES.md,
@@ -244,7 +382,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COLORS.gray100,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
