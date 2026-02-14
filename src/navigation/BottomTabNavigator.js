@@ -9,6 +9,7 @@ import { COLORS } from '../constants/theme';
 import DashboardScreen from '../screens/DashboardScreen';
 import SpecimenListScreen from '../screens/SpecimenListScreen';
 import SpecimenDetailScreen from '../screens/SpecimenDetailScreen';
+import StageUpdateScreen from '../screens/StageUpdateScreen';
 import SpecimenRegistrationScreen from '../screens/SpecimenRegistrationScreen';
 import QRLabelScreen from '../screens/QRLabelScreen';
 import ScannerScreen from '../screens/ScannerScreen';
@@ -28,12 +29,13 @@ function HomeStack() {
   );
 }
 
-// Specimen Stack (List + Detail)
+// Specimen Stack (List + Detail + Update)
 function SpecimenStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SpecimenListMain" component={SpecimenListScreen} />
       <Stack.Screen name="SpecimenDetail" component={SpecimenDetailScreen} />
+      <Stack.Screen name="StageUpdate" component={StageUpdateScreen} />
     </Stack.Navigator>
   );
 }

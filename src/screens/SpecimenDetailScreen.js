@@ -288,7 +288,7 @@ export default function SpecimenDetailScreen({ route, navigation }) {
         <View style={styles.actionsContainer}>
           <TouchableOpacity 
             style={styles.primaryButton}
-            onPress={() => Alert.alert('Update Stage', 'Stage update screen coming next!')}
+            onPress={() => navigation.navigate('StageUpdate', { specimenId: specimen.id })}
           >
             <Text style={styles.primaryButtonText}>Update to Next Stage</Text>
           </TouchableOpacity>
