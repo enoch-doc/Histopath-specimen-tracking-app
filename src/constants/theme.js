@@ -1,16 +1,16 @@
 // src/constants/theme.js
 
 export const COLORS = {
-  // Primary colors (from your prototype)
-  primary: '#3B82F6',      // Main blue
-  primaryDark: '#2563EB',  // Darker blue for pressed states
-  primaryLight: '#60A5FA', // Light blue for backgrounds
+  // Primary colors
+  primary: '#3B82F6',
+  primaryDark: '#2563EB',
+  primaryLight: '#60A5FA',
   
   // Status colors
-  success: '#22C55E',      // Green for completed stages
-  warning: '#EAB308',      // Yellow for in-progress
-  danger: '#EF4444',       // Red for urgent/STAT
-  info: '#06B6D4',         // Cyan for info messages
+  success: '#22C55E',
+  warning: '#EAB308',
+  danger: '#EF4444',
+  info: '#06B6D4',
   
   // Grayscale
   white: '#FFFFFF',
@@ -37,9 +37,9 @@ export const COLORS = {
   textWhite: '#FFFFFF',
   
   // Priority colors
-  stat: '#EF4444',         // Red for STAT
-  urgent: '#F97316',       // Orange for Urgent  
-  routine: '#3B82F6',      // Blue for Routine
+  stat: '#EF4444',
+  urgent: '#F97316',
+  routine: '#3B82F6',
 };
 
 export const SIZES = {
@@ -76,6 +76,7 @@ export const SIZES = {
   inputHeight: 50,
 };
 
+// SIMPLIFIED SHADOWS - Android compatible
 export const SHADOWS = {
   small: {
     shadowColor: '#000',
@@ -100,7 +101,6 @@ export const SHADOWS = {
   },
 };
 
-// Specimen stages (all 11)
 export const STAGES = {
   RECEPTION: 'reception',
   GROSSING: 'grossing',
@@ -129,7 +129,6 @@ export const STAGE_LABELS = {
   [STAGES.DISPATCH]: 'Report Dispatch/Collection',
 };
 
-// User roles
 export const ROLES = {
   RECEPTIONIST: 'receptionist',
   LAB_TECH: 'lab_technician',
@@ -148,7 +147,6 @@ export const ROLE_LABELS = {
   [ROLES.ADMIN]: 'Administrator',
 };
 
-// Priority levels
 export const PRIORITY = {
   STAT: 'stat',
   URGENT: 'urgent',
@@ -161,7 +159,6 @@ export const PRIORITY_LABELS = {
   [PRIORITY.ROUTINE]: 'Routine',
 };
 
-// Specimen types
 export const SPECIMEN_TYPES = [
   'Biopsy',
   'Cytology',

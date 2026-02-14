@@ -1,7 +1,6 @@
 // src/store/authStore.js
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authAPI } from '../services/api';
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -9,37 +8,54 @@ const useAuthStore = create((set) => ({
   isLoading: false,
   error: null,
 
-  // Login action
+  // Login action - MOCK VERSION (will replace with real API later)
   login: async (email, password) => {
     set({ isLoading: true, error: null });
-    try {
-      const response = await authAPI.login(email, password);
-      const { token, user } = response;
-      
-      // Save to AsyncStorage
-      await AsyncStorage.setItem('authToken', token);
-      await AsyncStorage.setItem('userData', JSON.stringify(user));
-      
-      set({ user, token, isLoading: false });
-      return { success: true };
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed';
-      set({ error: errorMessage, isLoading: false });
-      return { success: false, error: errorMessage };
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Mock user data based on email
+    let mockUser = {
+      id: 1,
+      email: email,
+      full_name: 'Test User',
+      role: 'receptionist',
+    };
+    
+    // Assign role based on email for testing
+    if (email.includes('receptionist')) {
+      mockUser.role = 'receptionist';
+      mockUser.full_name = 'Sarah Adeyemi';
+    } else if (email.includes('pathologist')) {
+      mockUser.role = 'pathologist';
+      mockUser.full_name = 'Dr. Ahmed Ibrahim';
+    } else if (email.includes('scientist')) {
+      mockUser.role = 'lab_scientist';
+      mockUser.full_name = 'John Okafor';
+    } else if (email.includes('tech')) {
+      mockUser.role = 'lab_technician';
+      mockUser.full_name = 'Mary Bello';
+    } else if (email.includes('admin')) {
+      mockUser.role = 'admin';
+      mockUser.full_name = 'Admin User';
     }
+    
+    const mockToken = 'mock-jwt-token-' + Date.now();
+    
+    // Save to AsyncStorage
+    await AsyncStorage.setItem('authToken', mockToken);
+    await AsyncStorage.setItem('userData', JSON.stringify(mockUser));
+    
+    set({ user: mockUser, token: mockToken, isLoading: false });
+    return { success: true };
   },
 
   // Logout action
   logout: async () => {
-    try {
-      await authAPI.logout();
-    } catch (error) {
-      console.log('Logout error:', error);
-    } finally {
-      await AsyncStorage.removeItem('authToken');
-      await AsyncStorage.removeItem('userData');
-      set({ user: null, token: null });
-    }
+    await AsyncStorage.removeItem('authToken');
+    await AsyncStorage.removeItem('userData');
+    set({ user: null, token: null });
   },
 
   // Check if user is already logged in (on app start)

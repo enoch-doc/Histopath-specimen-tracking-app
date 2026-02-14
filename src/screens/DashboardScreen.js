@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
 import useAuthStore from '../store/authStore';
@@ -49,7 +48,7 @@ export default function DashboardScreen({ navigation }) {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -111,7 +110,7 @@ export default function DashboardScreen({ navigation }) {
           <Text style={styles.activityTime}>1 hour ago</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -119,6 +118,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+    paddingTop: 40,
   },
   header: {
     backgroundColor: COLORS.primary,

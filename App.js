@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import LoginScreen from './src/screens/LoginScreen';
 import BottomTabNavigator from './src/navigation/BottomTabNavigator';
 import useAuthStore from './src/store/authStore';
@@ -22,8 +23,10 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      {user ? <BottomTabNavigator /> : <LoginScreen />}
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        {user ? <BottomTabNavigator /> : <LoginScreen />}
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
