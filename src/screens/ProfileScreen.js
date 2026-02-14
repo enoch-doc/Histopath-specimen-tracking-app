@@ -8,6 +8,18 @@ import useAuthStore from '../store/authStore';
 export default function ProfileScreen() {
   const { user, logout } = useAuthStore();
 
+  const handlePhotoUpload = () => {
+    Alert.alert(
+      'Update Profile Photo',
+      'Choose an option',
+      [
+        { text: 'Take Photo', onPress: () => Alert.alert('Camera', 'Camera feature coming with backend') },
+        { text: 'Choose from Gallery', onPress: () => Alert.alert('Gallery', 'Gallery feature coming with backend') },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
   const profileOptions = [
     { 
       title: 'Edit Profile', 
@@ -56,14 +68,21 @@ export default function ProfileScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
         <View style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={handlePhotoUpload}
+            activeOpacity={0.7}
+          >
             <View style={styles.avatar}>
               <Ionicons name="person" size={48} color={COLORS.white} />
             </View>
             <View style={styles.statusBadge}>
               <View style={styles.statusDot} />
             </View>
-          </View>
+            <View style={styles.cameraButton}>
+              <Ionicons name="camera" size={16} color={COLORS.white} />
+            </View>
+          </TouchableOpacity>
           
           <Text style={styles.userName}>{user?.full_name || 'User'}</Text>
           <Text style={styles.userRole}>
@@ -145,7 +164,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: COLORS.primary,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 30,
     paddingHorizontal: 20,
     alignItems: 'center',
   },
@@ -160,7 +179,7 @@ const styles = StyleSheet.create({
   profileCard: {
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
-    marginTop: -30,
+    marginTop: 20,
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -196,6 +215,19 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 8,
     backgroundColor: COLORS.success,
+  },
+  cameraButton: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: COLORS.white,
   },
   userName: {
     fontSize: 24,
