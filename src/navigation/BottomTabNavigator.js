@@ -1,9 +1,10 @@
 // src/navigation/BottomTabNavigator.js
 import React from 'react';
+import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { COLORS } from '../constants/theme';
 
-// Import screens (we'll create these next)
+// Import screens
 import DashboardScreen from '../screens/DashboardScreen';
 import SpecimenListScreen from '../screens/SpecimenListScreen';
 import ScannerScreen from '../screens/ScannerScreen';
@@ -30,7 +31,7 @@ export default function BottomTabNavigator() {
         component={DashboardScreen}
         options={{
           tabBarLabel: 'Home',
-          tabBarIcon: ({ color }) => <TabIcon icon="🏠" color={color} />,
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>🏠</Text>,
         }}
       />
       <Tab.Screen 
@@ -38,7 +39,7 @@ export default function BottomTabNavigator() {
         component={SpecimenListScreen}
         options={{
           tabBarLabel: 'Specimens',
-          tabBarIcon: ({ color }) => <TabIcon icon="📋" color={color} />,
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📋</Text>,
         }}
       />
       <Tab.Screen 
@@ -46,7 +47,7 @@ export default function BottomTabNavigator() {
         component={ScannerScreen}
         options={{
           tabBarLabel: 'Scan',
-          tabBarIcon: ({ color }) => <TabIcon icon="📷" color={color} />,
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📷</Text>,
         }}
       />
       <Tab.Screen 
@@ -54,16 +55,9 @@ export default function BottomTabNavigator() {
         component={ProfileScreen}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color }) => <TabIcon icon="👤" color={color} />,
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>👤</Text>,
         }}
       />
     </Tab.Navigator>
-  );
-}
-
-// Simple icon component
-function TabIcon({ icon, color }) {
-  return (
-    <span style={{ fontSize: 24 }}>{icon}</span>
   );
 }

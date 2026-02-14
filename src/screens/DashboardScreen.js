@@ -26,7 +26,7 @@ export default function DashboardScreen({ navigation }) {
       title: 'Register Specimen', 
       icon: '➕', 
       color: COLORS.primary,
-      screen: 'SpecimenList' // We'll create this later
+      screen: 'SpecimenList'
     },
     { 
       title: 'Scan QR Code', 

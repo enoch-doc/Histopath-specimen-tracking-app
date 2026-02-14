@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.textPrimary,
     marginBottom: SIZES.lg,
+    marginTop: SIZES.lg,
   },
   infoCard: {
     backgroundColor: COLORS.white,
