@@ -9,6 +9,7 @@ import { COLORS } from '../constants/theme';
 import DashboardScreen from '../screens/DashboardScreen';
 import SpecimenListScreen from '../screens/SpecimenListScreen';
 import SpecimenRegistrationScreen from '../screens/SpecimenRegistrationScreen';
+import QRLabelScreen from '../screens/QRLabelScreen';
 import ScannerScreen from '../screens/ScannerScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
@@ -21,6 +22,7 @@ function HomeStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="DashboardMain" component={DashboardScreen} />
       <Stack.Screen name="SpecimenRegistration" component={SpecimenRegistrationScreen} />
+      <Stack.Screen name="QRLabelScreen" component={QRLabelScreen} />
     </Stack.Navigator>
   );
 }
