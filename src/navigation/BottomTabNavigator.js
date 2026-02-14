@@ -2,15 +2,28 @@
 import React from 'react';
 import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { COLORS } from '../constants/theme';
 
 // Import screens
 import DashboardScreen from '../screens/DashboardScreen';
 import SpecimenListScreen from '../screens/SpecimenListScreen';
+import SpecimenRegistrationScreen from '../screens/SpecimenRegistrationScreen';
 import ScannerScreen from '../screens/ScannerScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+// Home Stack (Dashboard + Registration)
+function HomeStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="DashboardMain" component={DashboardScreen} />
+      <Stack.Screen name="SpecimenRegistration" component={SpecimenRegistrationScreen} />
+    </Stack.Navigator>
+  );
+}
 
 export default function BottomTabNavigator() {
   return (
@@ -28,7 +41,7 @@ export default function BottomTabNavigator() {
     >
       <Tab.Screen 
         name="Dashboard" 
-        component={DashboardScreen}
+        component={HomeStack}
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>🏠</Text>,

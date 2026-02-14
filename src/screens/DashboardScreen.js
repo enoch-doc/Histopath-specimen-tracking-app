@@ -22,10 +22,10 @@ export default function DashboardScreen({ navigation }) {
 
   const quickActions = [
     { 
-      title: 'Register Specimen', 
-      icon: '➕', 
-      color: COLORS.primary,
-      screen: 'SpecimenList'
+    title: 'Register Specimen', 
+    icon: '➕', 
+    color: COLORS.primary,
+    screen: 'SpecimenRegistration'  // <-- New screen name
     },
     { 
       title: 'Scan QR Code', 
