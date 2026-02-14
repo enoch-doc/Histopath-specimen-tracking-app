@@ -1,6 +1,6 @@
 // src/navigation/BottomTabNavigator.js
 import React from 'react';
-import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { COLORS } from '../constants/theme';
@@ -18,7 +18,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Home Stack (Dashboard + Registration)
+// Home Stack
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -29,7 +29,7 @@ function HomeStack() {
   );
 }
 
-// Specimen Stack (List + Detail + Update)
+// Specimen Stack
 function SpecimenStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -47,9 +47,16 @@ export default function BottomTabNavigator() {
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.gray400,
         tabBarStyle: {
-          height: 60,
+          height: 65,
           paddingBottom: 8,
           paddingTop: 8,
+          borderTopWidth: 1,
+          borderTopColor: COLORS.gray200,
+          backgroundColor: COLORS.white,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
         },
         headerShown: false,
       }}
@@ -59,7 +66,13 @@ export default function BottomTabNavigator() {
         component={HomeStack}
         options={{
           tabBarLabel: 'Home',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>🏠</Text>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'home' : 'home-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
         }}
       />
       <Tab.Screen 
@@ -67,7 +80,13 @@ export default function BottomTabNavigator() {
         component={SpecimenStack}
         options={{
           tabBarLabel: 'Specimens',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📋</Text>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'clipboard' : 'clipboard-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
         }}
       />
       <Tab.Screen 
@@ -75,7 +94,13 @@ export default function BottomTabNavigator() {
         component={ScannerScreen}
         options={{
           tabBarLabel: 'Scan',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📷</Text>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'qr-code' : 'qr-code-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
         }}
       />
       <Tab.Screen 
@@ -83,7 +108,13 @@ export default function BottomTabNavigator() {
         component={ProfileScreen}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>👤</Text>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'person' : 'person-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
         }}
       />
     </Tab.Navigator>
