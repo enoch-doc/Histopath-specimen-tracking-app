@@ -108,10 +108,7 @@ export default function SpecimenListScreen({ navigation }) {
   const renderSpecimenCard = ({ item }) => (
     <TouchableOpacity
       style={styles.specimenCard}
-      onPress={() => {
-        // Navigate to specimen detail (coming next)
-        alert(`Specimen Details for ${item.accessionNumber}\n\n(Detail screen coming next)`);
-      }}
+      onPress={() => navigation.navigate('SpecimenDetail', { specimenId: item.id })}
       activeOpacity={0.7}
     >
       {/* Priority Badge */}

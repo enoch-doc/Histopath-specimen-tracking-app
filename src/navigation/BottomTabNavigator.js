@@ -8,6 +8,7 @@ import { COLORS } from '../constants/theme';
 // Import screens
 import DashboardScreen from '../screens/DashboardScreen';
 import SpecimenListScreen from '../screens/SpecimenListScreen';
+import SpecimenDetailScreen from '../screens/SpecimenDetailScreen';
 import SpecimenRegistrationScreen from '../screens/SpecimenRegistrationScreen';
 import QRLabelScreen from '../screens/QRLabelScreen';
 import ScannerScreen from '../screens/ScannerScreen';
@@ -23,6 +24,16 @@ function HomeStack() {
       <Stack.Screen name="DashboardMain" component={DashboardScreen} />
       <Stack.Screen name="SpecimenRegistration" component={SpecimenRegistrationScreen} />
       <Stack.Screen name="QRLabelScreen" component={QRLabelScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// Specimen Stack (List + Detail)
+function SpecimenStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="SpecimenListMain" component={SpecimenListScreen} />
+      <Stack.Screen name="SpecimenDetail" component={SpecimenDetailScreen} />
     </Stack.Navigator>
   );
 }
@@ -51,7 +62,7 @@ export default function BottomTabNavigator() {
       />
       <Tab.Screen 
         name="SpecimenList" 
-        component={SpecimenListScreen}
+        component={SpecimenStack}
         options={{
           tabBarLabel: 'Specimens',
           tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📋</Text>,
