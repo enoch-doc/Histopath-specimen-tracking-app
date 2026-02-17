@@ -1,85 +1,77 @@
 // src/store/authStore.js
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../services/api';
 
 const useAuthStore = create((set) => ({
   user: null,
   token: null,
   isLoading: false,
+  isAuthenticated: false,
   error: null,
 
-  // Login action - MOCK VERSION (will replace with real API later)
+  // Login with REAL API
   login: async (email, password) => {
     set({ isLoading: true, error: null });
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Mock user data based on email
-    let mockUser = {
-      id: 1,
-      email: email,
-      full_name: 'Test User',
-      role: 'receptionist',
-    };
-    
-    // Assign role based on email for testing
-    if (email.includes('receptionist')) {
-      mockUser.role = 'receptionist';
-      mockUser.full_name = 'Sarah Adeyemi';
-    } else if (email.includes('pathologist')) {
-      mockUser.role = 'pathologist';
-      mockUser.full_name = 'Dr. Ahmed Ibrahim';
-    } else if (email.includes('scientist')) {
-      mockUser.role = 'lab_scientist';
-      mockUser.full_name = 'John Okafor';
-    } else if (email.includes('tech')) {
-      mockUser.role = 'lab_technician';
-      mockUser.full_name = 'Mary Bello';
-    } else if (email.includes('admin')) {
-      mockUser.role = 'admin';
-      mockUser.full_name = 'Admin User';
-    }
-    
-    const mockToken = 'mock-jwt-token-' + Date.now();
-    
-    // Save to AsyncStorage
-    await AsyncStorage.setItem('authToken', mockToken);
-    await AsyncStorage.setItem('userData', JSON.stringify(mockUser));
-    
-    set({ user: mockUser, token: mockToken, isLoading: false });
-    return { success: true };
-  },
-
-  // Logout action
-  logout: async () => {
-    await AsyncStorage.removeItem('authToken');
-    await AsyncStorage.removeItem('userData');
-    set({ user: null, token: null });
-  },
-
-  // Check if user is already logged in (on app start)
-  checkAuth: async () => {
-    set({ isLoading: true });
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      const userData = await AsyncStorage.getItem('userData');
-      
-      if (token && userData) {
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user } = response.data;
+
+      // Save token globally and to storage
+      global.authToken = token;
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+
+      set({
+        user,
+        token,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Login failed. Check your connection.';
+      set({ isLoading: false, error: message });
+      return { success: false, message };
+    }
+  },
+
+  // Logout
+  logout: async () => {
+    global.authToken = null;
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      error: null,
+    });
+  },
+
+  // Check if user is already logged in
+  checkAuth: async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userStr = await AsyncStorage.getItem('user');
+
+      if (token && userStr) {
+        const user = JSON.parse(userStr);
+        global.authToken = token;
         set({
-          user: JSON.parse(userData),
+          user,
           token,
-          isLoading: false,
+          isAuthenticated: true,
         });
-      } else {
-        set({ isLoading: false });
       }
     } catch (error) {
-      set({ isLoading: false });
+      console.error('Auth check error:', error);
     }
   },
 
-  // Clear error
+  // Clear errors
   clearError: () => set({ error: null }),
 }));
 
