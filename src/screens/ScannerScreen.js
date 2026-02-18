@@ -4,105 +4,178 @@ import {
   View,
   Text,
   StyleSheet,
+  ScrollView,
   TouchableOpacity,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { COLORS, SIZES } from '../constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS, SIZES, SHADOWS } from '../constants/theme';
+import api from '../services/api';
 
 export default function ScannerScreen({ navigation }) {
-  const [manualInput, setManualInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
-  const handleSearch = () => {
-    if (!manualInput.trim()) {
+  const handleScan = () => {
+    Alert.alert(
+      'QR Scanner',
+      'Camera scanning will be implemented in full deployment. For now, use manual search below.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleManualSearch = async () => {
+    if (!searchQuery.trim()) {
       Alert.alert('Enter Accession Number', 'Please enter a specimen accession number');
       return;
     }
 
-    Alert.alert(
-      'Specimen Found',
-      `Accession Number: ${manualInput}\n\nWhat would you like to do?`,
-      [
-        {
-          text: 'View Details',
-          onPress: () => {
-            Alert.alert('Specimen Details', `Loading details for ${manualInput}...\n\n(Detail screen coming next)`);
-            setManualInput('');
-          }
-        },
-        {
-          text: 'Update Stage',
-          onPress: () => {
-            Alert.alert('Update Stage', `Update stage for ${manualInput}...\n\n(Stage update coming next)`);
-            setManualInput('');
-          }
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        }
-      ]
-    );
+    setIsSearching(true);
+    try {
+      // Search for specimen by accession number
+      const response = await api.get(`/specimens/search/${searchQuery.trim()}`);
+      
+      if (response.data.specimens.length === 0) {
+        Alert.alert('Not Found', `No specimen found with accession number: ${searchQuery}`);
+        setIsSearching(false);
+        return;
+      }
+
+      const specimen = response.data.specimens[0];
+      setIsSearching(false);
+      setSearchQuery('');
+      
+      // Navigate to specimen detail
+      navigation.navigate('SpecimenList', {
+        screen: 'SpecimenDetail',
+        params: { specimenId: specimen.id }
+      });
+
+    } catch (error) {
+      setIsSearching(false);
+      Alert.alert('Error', 'Failed to search for specimen. Check your connection.');
+    }
   };
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Quick Search</Text>
-        <Text style={styles.headerSubtitle}>Enter accession number manually</Text>
+        <Text style={styles.headerTitle}>QR Scanner</Text>
+        <Text style={styles.headerSubtitle}>Scan specimen QR code</Text>
       </View>
 
-      {/* Content */}
-      <View style={styles.content}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Scanner Placeholder */}
-        <View style={styles.scannerPlaceholder}>
-          <Text style={styles.placeholderIcon}>📷</Text>
-          <Text style={styles.placeholderTitle}>QR Scanner</Text>
-          <Text style={styles.placeholderText}>
-            Camera scanner will be enabled when connected to internet
-          </Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>Coming Soon</Text>
+        <View style={styles.scannerContainer}>
+          <View style={styles.scannerFrame}>
+            <View style={[styles.scannerCorner, styles.cornerTopLeft]} />
+            <View style={[styles.scannerCorner, styles.cornerTopRight]} />
+            <View style={[styles.scannerCorner, styles.cornerBottomLeft]} />
+            <View style={[styles.scannerCorner, styles.cornerBottomRight]} />
+            
+            <Ionicons name="qr-code-outline" size={120} color={COLORS.primary} />
           </View>
+
+          <TouchableOpacity style={styles.scanButton} onPress={handleScan}>
+            <Ionicons name="scan" size={28} color={COLORS.white} />
+            <Text style={styles.scanButtonText}>Scan QR Code</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.scannerHint}>
+            Position QR code within the frame
+          </Text>
         </View>
 
-        {/* Manual Entry */}
-        <View style={styles.manualSection}>
-          <Text style={styles.sectionTitle}>Manual Entry</Text>
-          <Text style={styles.sectionSubtitle}>
+        {/* Divider */}
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        {/* Manual Search */}
+        <View style={styles.manualSearchContainer}>
+          <Text style={styles.manualSearchTitle}>Manual Search</Text>
+          <Text style={styles.manualSearchHint}>
             Enter specimen accession number
           </Text>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputIcon}>🔍</Text>
+          <View style={styles.searchInputContainer}>
+            <Ionicons name="search" size={20} color={COLORS.gray400} />
             <TextInput
-              style={styles.input}
+              style={styles.searchInput}
               placeholder="e.g., S26-00123"
               placeholderTextColor={COLORS.gray400}
-              value={manualInput}
-              onChangeText={setManualInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
               autoCapitalize="characters"
-              onSubmitEditing={handleSearch}
+              onSubmitEditing={handleManualSearch}
             />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={20} color={COLORS.gray400} />
+              </TouchableOpacity>
+            )}
           </View>
 
-          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-            <Text style={styles.searchButtonText}>Search Specimen</Text>
+          <TouchableOpacity
+            style={[
+              styles.searchButton,
+              (!searchQuery.trim() || isSearching) && styles.searchButtonDisabled
+            ]}
+            onPress={handleManualSearch}
+            disabled={!searchQuery.trim() || isSearching}
+          >
+            {isSearching ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <>
+                <Ionicons name="search" size={20} color={COLORS.white} />
+                <Text style={styles.searchButtonText}>Search Specimen</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
 
-        {/* Quick Info */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoIcon}>💡</Text>
-          <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>Quick Tip</Text>
-            <Text style={styles.infoText}>
-              You can also view all specimens from the "Specimens" tab
-            </Text>
-          </View>
+        {/* Quick Actions */}
+        <View style={styles.quickActionsContainer}>
+          <Text style={styles.quickActionsTitle}>Quick Actions</Text>
+          
+          <TouchableOpacity
+            style={styles.quickActionCard}
+            onPress={() => navigation.navigate('Dashboard', {
+              screen: 'SpecimenRegistration'
+            })}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: COLORS.primary + '15' }]}>
+              <Ionicons name="add-circle" size={28} color={COLORS.primary} />
+            </View>
+            <View style={styles.quickActionContent}>
+              <Text style={styles.quickActionTitle}>Register New Specimen</Text>
+              <Text style={styles.quickActionSubtitle}>Create new specimen entry</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.gray400} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.quickActionCard}
+            onPress={() => navigation.navigate('SpecimenList')}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: COLORS.info + '15' }]}>
+              <Ionicons name="list" size={28} color={COLORS.info} />
+            </View>
+            <View style={styles.quickActionContent}>
+              <Text style={styles.quickActionTitle}>View All Specimens</Text>
+              <Text style={styles.quickActionSubtitle}>Browse specimen list</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.gray400} />
+          </TouchableOpacity>
         </View>
-      </View>
+     <View style={{ height: 40 }} />
+      </ScrollView>
     </View>
   );
 }
@@ -115,12 +188,11 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: COLORS.primary,
     paddingTop: 60,
-    paddingBottom: 24,
+    paddingBottom: 20,
     paddingHorizontal: 20,
-    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: COLORS.white,
   },
@@ -134,117 +206,175 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  scannerPlaceholder: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 40,
+  scannerContainer: {
     alignItems: 'center',
+    marginBottom: 30,
+  },
+  scannerFrame: {
+    width: 250,
+    height: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
     marginBottom: 24,
-    borderWidth: 2,
-    borderColor: COLORS.gray200,
-    borderStyle: 'dashed',
   },
-  placeholderIcon: {
-    fontSize: 80,
-    marginBottom: 16,
+  scannerCorner: {
+    position: 'absolute',
+    width: 30,
+    height: 30,
+    borderColor: COLORS.primary,
   },
-  placeholderTitle: {
-    fontSize: 20,
+  cornerTopLeft: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+  },
+  cornerTopRight: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+  },
+  cornerBottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+  },
+  cornerBottomRight: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+  },
+  scanButton: {
+    backgroundColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 8,
+    ...SHADOWS.medium,
+  },
+  scanButtonText: {
+    color: COLORS.white,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginBottom: 8,
   },
-  placeholderText: {
+  scannerHint: {
     fontSize: 14,
     color: COLORS.textSecondary,
+    marginTop: 12,
     textAlign: 'center',
-    lineHeight: 20,
   },
-  badge: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginTop: 16,
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
   },
-  badgeText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: 'bold',
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.gray300,
   },
-  manualSection: {
+  dividerText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginHorizontal: 16,
+    fontWeight: '600',
+  },
+  manualSearchContainer: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
     padding: 20,
-    marginBottom: 20,
+    borderRadius: 12,
+    marginBottom: 24,
+    ...SHADOWS.small,
   },
-  sectionTitle: {
+  manualSearchTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.textPrimary,
     marginBottom: 4,
   },
-  sectionSubtitle: {
-    fontSize: 14,
+  manualSearchHint: {
+    fontSize: 13,
     color: COLORS.textSecondary,
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  inputContainer: {
+  searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: COLORS.gray300,
+    backgroundColor: COLORS.gray100,
     borderRadius: 8,
     paddingHorizontal: 12,
-    marginBottom: 16,
-    backgroundColor: COLORS.white,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.gray300,
   },
-  inputIcon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  input: {
+  searchInput: {
     flex: 1,
     height: 50,
     fontSize: 16,
     color: COLORS.textPrimary,
+    marginLeft: 8,
   },
   searchButton: {
-    backgroundColor: COLORS.primary,
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
+    backgroundColor: COLORS.success,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 8,
+    gap: 8,
+  },
+  searchButtonDisabled: {
+    backgroundColor: COLORS.gray400,
   },
   searchButtonText: {
     color: COLORS.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
-  infoCard: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.info + '10',
+  quickActionsContainer: {
+    backgroundColor: COLORS.white,
     padding: 16,
     borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.info,
+    ...SHADOWS.small,
   },
-  infoIcon: {
-    fontSize: 24,
+  quickActionsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginBottom: 12,
+  },
+  quickActionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.gray200,
+  },
+  quickActionIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 12,
   },
-  infoTextContainer: {
+  quickActionContent: {
     flex: 1,
   },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: COLORS.info,
-    marginBottom: 4,
+  quickActionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: 2,
   },
-  infoText: {
-    fontSize: 13,
+  quickActionSubtitle: {
+    fontSize: 12,
     color: COLORS.textSecondary,
-    lineHeight: 18,
   },
 });

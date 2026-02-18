@@ -27,7 +27,12 @@ export default function App() {
 
   if (isChecking) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.primary }}>
+      <View style={{ 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        backgroundColor: COLORS.primary 
+      }}>
         <ActivityIndicator size="large" color={COLORS.white} />
       </View>
     );
@@ -48,5 +53,3 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
-
-

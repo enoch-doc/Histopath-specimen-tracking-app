@@ -1,5 +1,5 @@
 // src/screens/SpecimenListScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,99 +8,76 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { COLORS, SIZES } from '../constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { COLORS, SIZES, SHADOWS } from '../constants/theme';
+import api from '../services/api';
 
 export default function SpecimenListScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
-
-  // Mock specimen data (will come from backend later)
-  const mockSpecimens = [
-    {
-      id: 1,
-      accessionNumber: 'S26-00123',
-      patientName: 'John Doe',
-      patientId: 'LAU123456',
-      specimenType: 'Biopsy',
-      currentStage: 'Grossing',
-      priority: 'STAT',
-      registeredAt: '2026-02-14 09:15',
-      urgencyColor: COLORS.danger,
-    },
-    {
-      id: 2,
-      accessionNumber: 'S26-00122',
-      patientName: 'Jane Smith',
-      patientId: 'LAU123455',
-      specimenType: 'Cytology',
-      currentStage: 'Processing',
-      priority: 'Urgent',
-      registeredAt: '2026-02-14 08:30',
-      urgencyColor: COLORS.warning,
-    },
-    {
-      id: 3,
-      accessionNumber: 'S26-00121',
-      patientName: 'Ahmed Ibrahim',
-      patientId: 'LAU123454',
-      specimenType: 'Excision',
-      currentStage: 'Staining',
-      priority: 'Routine',
-      registeredAt: '2026-02-14 07:45',
-      urgencyColor: COLORS.primary,
-    },
-    {
-      id: 4,
-      accessionNumber: 'S26-00120',
-      patientName: 'Mary Johnson',
-      patientId: 'LAU123453',
-      specimenType: 'Biopsy',
-      currentStage: 'Reception',
-      priority: 'Routine',
-      registeredAt: '2026-02-13 16:20',
-      urgencyColor: COLORS.primary,
-    },
-    {
-      id: 5,
-      accessionNumber: 'S26-00119',
-      patientName: 'David Wilson',
-      patientId: 'LAU123452',
-      specimenType: 'Fine Needle Aspiration',
-      currentStage: 'Reporting',
-      priority: 'Urgent',
-      registeredAt: '2026-02-13 14:10',
-      urgencyColor: COLORS.warning,
-    },
-  ];
+  const [specimens, setSpecimens] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filters = [
     { label: 'All', value: 'all' },
     { label: 'Reception', value: 'reception' },
+    { label: 'Grossing', value: 'grossing' },
     { label: 'Processing', value: 'processing' },
+    { label: 'Reporting', value: 'reporting' },
     { label: 'Completed', value: 'completed' },
   ];
 
   const priorityFilters = [
     { label: 'All', value: 'all' },
-    { label: 'STAT', value: 'STAT' },
-    { label: 'Urgent', value: 'Urgent' },
-    { label: 'Routine', value: 'Routine' },
+    { label: 'STAT', value: 'stat' },
+    { label: 'Urgent', value: 'urgent' },
+    { label: 'Routine', value: 'routine' },
   ];
 
-  // Filter specimens based on search and filters
-  const filteredSpecimens = mockSpecimens.filter(specimen => {
-    const matchesSearch = 
-      specimen.accessionNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      specimen.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      specimen.patientId.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesFilter = selectedFilter === 'all' || 
-      specimen.currentStage.toLowerCase() === selectedFilter.toLowerCase();
-    
-    const matchesPriority = selectedPriority === 'all' || 
-      specimen.priority === selectedPriority;
+  const fetchSpecimens = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get('/specimens');
+      setSpecimens(response.data.specimens);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load specimens. Check your connection.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSpecimens();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchSpecimens();
+    }, [])
+  );
+
+  const getPriorityColor = (priority) => {
+    if (priority === 'stat') return COLORS.danger;
+    if (priority === 'urgent') return COLORS.warning;
+    return COLORS.primary;
+  };
+
+  const filteredSpecimens = specimens.filter(specimen => {
+    const matchesSearch =
+      specimen.accession_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      specimen.patient_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      specimen.patient_id?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesFilter = selectedFilter === 'all' ||
+      specimen.current_stage?.toLowerCase() === selectedFilter.toLowerCase();
+
+    const matchesPriority = selectedPriority === 'all' ||
+      specimen.priority?.toLowerCase() === selectedPriority.toLowerCase();
 
     return matchesSearch && matchesFilter && matchesPriority;
   });
@@ -112,20 +89,20 @@ export default function SpecimenListScreen({ navigation }) {
       activeOpacity={0.7}
     >
       {/* Priority Badge */}
-      <View style={[styles.priorityBadge, { backgroundColor: item.urgencyColor }]}>
-        <Text style={styles.priorityText}>{item.priority}</Text>
+      <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(item.priority) }]}>
+        <Text style={styles.priorityText}>{item.priority?.toUpperCase()}</Text>
       </View>
 
       {/* Header */}
       <View style={styles.cardHeader}>
         <View style={styles.cardHeaderLeft}>
-          <Text style={styles.accessionNumber}>{item.accessionNumber}</Text>
-          <Text style={styles.patientName}>{item.patientName}</Text>
+          <Text style={styles.accessionNumber}>{item.accession_number}</Text>
+          <Text style={styles.patientName}>{item.patient_name}</Text>
         </View>
         <View style={styles.stageContainer}>
           <Text style={styles.stageLabel}>Current Stage</Text>
-          <Text style={[styles.stageValue, { color: item.urgencyColor }]}>
-            {item.currentStage}
+          <Text style={[styles.stageValue, { color: getPriorityColor(item.priority) }]}>
+            {item.current_stage?.replace('_', ' ')}
           </Text>
         </View>
       </View>
@@ -134,23 +111,23 @@ export default function SpecimenListScreen({ navigation }) {
       <View style={styles.cardDetails}>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Patient ID:</Text>
-          <Text style={styles.detailValue}>{item.patientId}</Text>
+          <Text style={styles.detailValue}>{item.patient_id}</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Type:</Text>
-          <Text style={styles.detailValue}>{item.specimenType}</Text>
+          <Text style={styles.detailValue}>{item.specimen_type}</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Registered:</Text>
-          <Text style={styles.detailValue}>{item.registeredAt}</Text>
+          <Text style={styles.detailValue}>
+            {new Date(item.registered_at).toLocaleDateString()}
+          </Text>
         </View>
       </View>
 
       {/* Footer */}
       <View style={styles.cardFooter}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Text style={styles.actionButtonText}>View Details →</Text>
-        </TouchableOpacity>
+        <Text style={styles.actionButtonText}>View Details →</Text>
       </View>
     </TouchableOpacity>
   );
@@ -168,7 +145,7 @@ export default function SpecimenListScreen({ navigation }) {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search" size={18} color={COLORS.gray400} style={{ marginRight: 8 }} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search by accession, patient, or ID..."
@@ -178,19 +155,18 @@ export default function SpecimenListScreen({ navigation }) {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Text style={styles.clearIcon}>✕</Text>
+              <Ionicons name="close-circle" size={18} color={COLORS.gray400} />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
-      {/* Filters Section */}
+      {/* Filters */}
       <View style={styles.filtersSection}>
-        {/* Stage Filters */}
         <View style={styles.filterRow}>
           <Text style={styles.filterLabel}>Stage:</Text>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.filterScroll}
           >
@@ -215,11 +191,10 @@ export default function SpecimenListScreen({ navigation }) {
           </ScrollView>
         </View>
 
-        {/* Priority Filters */}
         <View style={styles.filterRow}>
           <Text style={styles.filterLabel}>Priority:</Text>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.filterScroll}
           >
@@ -245,13 +220,18 @@ export default function SpecimenListScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Specimen List */}
-      {filteredSpecimens.length === 0 ? (
+      {/* Content */}
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={styles.loadingText}>Loading specimens...</Text>
+        </View>
+      ) : filteredSpecimens.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📭</Text>
+          <Ionicons name="clipboard-outline" size={80} color={COLORS.gray300} />
           <Text style={styles.emptyTitle}>No Specimens Found</Text>
           <Text style={styles.emptyText}>
-            {searchQuery 
+            {searchQuery
               ? 'Try adjusting your search or filters'
               : 'No specimens registered yet'}
           </Text>
@@ -263,6 +243,8 @@ export default function SpecimenListScreen({ navigation }) {
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          onRefresh={fetchSpecimens}
+          refreshing={isLoading}
         />
       )}
     </View>
@@ -305,20 +287,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.gray300,
   },
-  searchIcon: {
-    fontSize: 18,
-    marginRight: 8,
-  },
   searchInput: {
     flex: 1,
     height: 44,
     fontSize: 16,
     color: COLORS.textPrimary,
-  },
-  clearIcon: {
-    fontSize: 18,
-    color: COLORS.gray500,
-    padding: 4,
   },
   filtersSection: {
     backgroundColor: COLORS.white,
@@ -388,6 +361,16 @@ const styles = StyleSheet.create({
   priorityChipTextActive: {
     color: COLORS.white,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    marginTop: 12,
+  },
   listContent: {
     padding: 16,
   },
@@ -445,6 +428,7 @@ const styles = StyleSheet.create({
   stageValue: {
     fontSize: 14,
     fontWeight: 'bold',
+    textTransform: 'capitalize',
   },
   cardDetails: {
     paddingHorizontal: 16,
@@ -472,8 +456,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: COLORS.gray200,
-  },
-  actionButton: {
     alignItems: 'center',
   },
   actionButtonText: {
@@ -487,15 +469,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 40,
   },
-  emptyIcon: {
-    fontSize: 80,
-    marginBottom: 16,
-  },
   emptyTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.textPrimary,
     marginBottom: 8,
+    marginTop: 16,
   },
   emptyText: {
     fontSize: 14,
